@@ -2,8 +2,8 @@ global using Microsoft.EntityFrameworkCore;
 global using Telegram.Bot;
 global using Telegram.Bot.Requests.Abstractions;
 global using Telegram.Bot.Exceptions;
-global using Telegram.Bot.Extensions.Polling;
 global using Telegram.Bot.Types;
+global using Telegram.Bot.Types.Enums;
 global using WebClient;
 using WebClient.Modules;
 
@@ -13,7 +13,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<UsersContext>();
-builder.Services.AddSingleton<DataBaseModule>();
+ReceiveServer receiveServer = new();
+builder.Services.AddSingleton(receiveServer);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
