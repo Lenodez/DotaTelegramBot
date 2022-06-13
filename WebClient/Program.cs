@@ -1,13 +1,11 @@
 global using Microsoft.EntityFrameworkCore;
 global using Telegram.Bot;
-global using Telegram.Bot.Requests.Abstractions;
 global using Telegram.Bot.Exceptions;
 global using Telegram.Bot.Types;
 global using Telegram.Bot.Types.Enums;
 global using WebClient.Commands;
 global using WebClient.Modules;
 global using WebClient;
-using Telegram.Bot.Extensions.Polling;
 using WebClient.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,9 +15,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<UsersContext>();
 builder.Services.AddSingleton<ICommandExecutor, CommandExecutor>();
-builder.Services.AddTransient<IUpdateHandler, UpdateHandler>();
+builder.Services.AddSingleton<UpdateHandler>();
 builder.Services.AddSingleton<TelegramBot>();
-
 builder.Services.AddSingleton<BaseCommand, StartCommand>();
 
 
@@ -39,6 +36,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-var botInit = app.Services.GetRequiredService<TelegramBot>().GetBot().Result;
+//Зависание при получении сервиса
+var init = app.Services.GetRequiredService<TelegramBot>();
+init.GetBot().Wait();
 
 app.Run();

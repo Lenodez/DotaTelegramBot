@@ -1,11 +1,12 @@
 ﻿using Telegram.Bot.Extensions.Polling;
+using WebClient.Handlers;
 
 namespace WebClient.Modules {
     public class TelegramBot {
         private readonly IConfiguration _configuration;
-        private readonly IUpdateHandler _updateHandler;
+        private readonly UpdateHandler _updateHandler;
         private TelegramBotClient _botClient;
-        public TelegramBot(IConfiguration configuration, IUpdateHandler updateHandler) {
+        public TelegramBot(IConfiguration configuration, UpdateHandler updateHandler) {
             _updateHandler = updateHandler;
             _configuration = configuration;            
         }
