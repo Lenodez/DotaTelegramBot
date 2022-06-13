@@ -4,8 +4,11 @@ global using Telegram.Bot.Requests.Abstractions;
 global using Telegram.Bot.Exceptions;
 global using Telegram.Bot.Types;
 global using Telegram.Bot.Types.Enums;
+global using WebClient.Commands;
+global using WebClient.Modules;
 global using WebClient;
-using WebClient.Modules;
+using Telegram.Bot.Extensions.Polling;
+using WebClient.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,12 +16,18 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<UsersContext>();
-ReceiveServer receiveServer = new();
-builder.Services.AddSingleton(receiveServer);
+builder.Services.AddSingleton<ICommandExecutor, CommandExecutor>();
+builder.Services.AddTransient<IUpdateHandler, UpdateHandler>();
+builder.Services.AddSingleton<TelegramBot>();
+
+builder.Services.AddSingleton<BaseCommand, StartCommand>();
+
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment()) {
@@ -29,5 +38,7 @@ if (app.Environment.IsDevelopment()) {
 app.UseAuthorization();
 
 app.MapControllers();
+
+var botInit = app.Services.GetRequiredService<TelegramBot>().GetBot().Result;
 
 app.Run();

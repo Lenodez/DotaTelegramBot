@@ -1,23 +1,23 @@
-﻿namespace WebClient.Handlers {
-    public class UpdateHandler {
-        public static async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken) {
-            // Only process Message updates: https://core.telegram.org/bots/api#message
-            if (update.Type != UpdateType.Message)
-                return;
-            // Only process text messages
-            if (update.Message!.Type != MessageType.Text)
-                return;
+﻿using Telegram.Bot.Extensions.Polling;
 
-            var chatId = update.Message.Chat.Id;
-            var messageText = update.Message.Text;
+namespace WebClient.Handlers {
+    public class UpdateHandler : IUpdateHandler {
+        private readonly ICommandExecutor _commandExecutor;
+        public UpdateHandler(ICommandExecutor commandExecutor) {
+            _commandExecutor = commandExecutor;
+        }
+        public Task HandleErrorAsync(ITelegramBotClient botClient, Exception exception, CancellationToken cancellationToken) {
+            var ErrorMessage = exception switch {
+                ApiRequestException apiRequestException
+                    => $"Telegram API Error:\n[{apiRequestException.ErrorCode}]\n{apiRequestException.Message}",
+                _ => exception.ToString()
+            };
+            Console.WriteLine(ErrorMessage);
+            return Task.CompletedTask;
+        }
 
-            Console.WriteLine($"Received a '{messageText}' message in chat {chatId}.");
-
-            // Echo received message text
-            Message sentMessage = await botClient.SendTextMessageAsync(
-                chatId: chatId,
-                text: "You said:\n" + messageText,
-                cancellationToken: cancellationToken);
+        public async Task HandleUpdateAsync(ITelegramBotClient botClient, Update update, CancellationToken cancellationToken) {
+            await _commandExecutor.Execute(update);
         }
     }
 }
